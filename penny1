@@ -32,12 +32,27 @@ l_to_n([H|T]) ->
 num_duplicates(L) ->
 	length(lists:usort(L)) - length(L).
 
-main([Arg]) ->
-	N = list_to_integer(Arg),
+pennies(N) ->
 	io:format("N: ~p~n", [N]),
 	Input = lists:duplicate(N, x),
-	Solutions = stacks(Input),
-	NSol = l_to_n(Solutions),
+	stacks(Input).
+
+pennies(visual, N) ->
+	Solutions = pennies(N),
+	io:format("~p solutions:~n", [length(Solutions)]),
+	Solutions;
+pennies(numeric, N) ->
+	Solutions = l_to_n(pennies(N)),
 	io:format("~p solutions (~p dups):~n", [length(Solutions), num_duplicates(Solutions)]),
-	print_solutions(NSol),
+	Solutions.
+
+parse_argv([N, Oformat]) ->
+	{ list_to_integer(N), list_to_atom(Oformat) };
+parse_argv([N]) ->
+	{ list_to_integer(N), visual }.
+
+main(Argv) ->
+	{ N, Oformat } = parse_argv(Argv),
+	Solutions = pennies(Oformat, N),
+	print_solutions(Solutions),
 	timer:sleep(100).	% hack to stop escript from truncating output
