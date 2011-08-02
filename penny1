@@ -1,0 +1,36 @@
+#! /usr/bin/env escript
+% vi: ft=erlang
+
+% for erlang practice & ease of visual inspection, represent stacks as lists of
+% atoms rather than using numbers
+
+seq(A, B) when B < A -> [];
+seq(A, B) -> lists:seq(A, B).
+
+stacks(L, _Min) when length(L) < 2 -> [];
+stacks(L, _Min) when length(L) == 2 -> [[L]];
+stacks(L, Min) ->
+	Split = fun(N) -> tuple_to_list(lists:split(N, L)) end,
+	Recurse = fun([H, T]) -> lists:map(fun(X) -> [H] ++ X end, stacks(T, length(H))) end,
+	[[ L ]] ++ lists:flatmap(Recurse, lists:map(Split, seq(Min, trunc(length(L) / 2)))).
+
+stacks(L) ->
+	lists:map(fun erlang:list_to_tuple/1, stacks(L, 2)).
+
+print_solutions([], _N) -> ok;
+print_solutions([H|T], N) ->
+	io:format("solution ~p: ~p~n", [N, H]),
+	print_solutions(T, N+1).
+
+print_solutions(L) ->
+	print_solutions(L, 1).
+
+main([Arg]) ->
+	N = list_to_integer(Arg),
+	io:format("N: ~p~n", [N]),
+	Input = lists:duplicate(N, x),
+	io:format("Input: ~p~n", [Input]),
+	Solutions = stacks(Input),
+	io:format("~p solutions:~n", [length(Solutions)]),
+	print_solutions(Solutions),
+	timer:sleep(100).	% hack to stop escript from truncating output
