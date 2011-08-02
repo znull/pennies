@@ -25,12 +25,19 @@ print_solutions([H|T], N) ->
 print_solutions(L) ->
 	print_solutions(L, 1).
 
+l_to_n([]) -> [];
+l_to_n([H|T]) ->
+	lists:sort([ list_to_tuple(lists:sort(lists:map(fun erlang:length/1, tuple_to_list(H)))) | l_to_n(T) ]).
+
+num_duplicates(L) ->
+	length(lists:usort(L)) - length(L).
+
 main([Arg]) ->
 	N = list_to_integer(Arg),
 	io:format("N: ~p~n", [N]),
 	Input = lists:duplicate(N, x),
-	io:format("Input: ~p~n", [Input]),
 	Solutions = stacks(Input),
-	io:format("~p solutions:~n", [length(Solutions)]),
-	print_solutions(Solutions),
+	NSol = l_to_n(Solutions),
+	io:format("~p solutions (~p dups):~n", [length(Solutions), num_duplicates(Solutions)]),
+	print_solutions(NSol),
 	timer:sleep(100).	% hack to stop escript from truncating output
